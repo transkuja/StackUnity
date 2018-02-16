@@ -48,6 +48,9 @@ public class PlayerController : MonoBehaviour {
     void OnClickProcess()
     {
         // Pose le bloc
+        if (gameManager.currentBlock == null)
+            return;
+
         Destroy(gameManager.currentBlock.GetComponent<MoveBlock>());
 
 
@@ -142,6 +145,7 @@ public class PlayerController : MonoBehaviour {
                 fallingPart.transform.position = new Vector3((gameManager.currentScale.x)/2 + diff, gameManager.currentBlock.transform.position.y, gameManager.currentBlock.transform.position.z); ;
                 fallingPart.GetComponent<Renderer>().material.color = gameManager.lastColor;
                 fallingPart.AddComponent<Rigidbody>();
+                Destroy(fallingPart, 1.0f);
             }
             else
             {
@@ -157,6 +161,7 @@ public class PlayerController : MonoBehaviour {
                 fallingPart.transform.position = new Vector3(-(gameManager.currentScale.x) / 2 - diff, gameManager.currentBlock.transform.position.y, gameManager.currentBlock.transform.position.z); ;
                 fallingPart.GetComponent<Renderer>().material.color = gameManager.lastColor;
                 fallingPart.AddComponent<Rigidbody>();
+                Destroy(fallingPart, 1.0f);
             }
         }
         else
@@ -175,6 +180,7 @@ public class PlayerController : MonoBehaviour {
                 fallingPart.transform.position = new Vector3(gameManager.currentBlock.transform.position.x, gameManager.currentBlock.transform.position.y, diff + (gameManager.currentScale.z / 2)); ;
                 fallingPart.GetComponent<Renderer>().material.color = gameManager.lastColor;
                 fallingPart.AddComponent<Rigidbody>();
+                Destroy(fallingPart, 1.0f);
             }
             else
             {
@@ -190,6 +196,7 @@ public class PlayerController : MonoBehaviour {
                 fallingPart.transform.position = new Vector3(gameManager.currentBlock.transform.position.x, gameManager.currentBlock.transform.position.y, -(diff + (gameManager.currentScale.z/2)));
                 fallingPart.GetComponent<Renderer>().material.color = gameManager.lastColor;
                 fallingPart.AddComponent<Rigidbody>();
+                Destroy(fallingPart, 1.0f);
             }
         }
 

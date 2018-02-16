@@ -20,6 +20,7 @@ public class GameManager : MonoBehaviour {
 
     void InitGame()
     {
+        Camera.main.orthographicSize = 5;
         lastSpawner = 0;
         currentScale = defaultScale;
         isInGameOver = false;
@@ -60,6 +61,8 @@ public class GameManager : MonoBehaviour {
     public void GameOver(int _score)
     {
         gameOverPanel.SetActive(true);
+        Destroy(currentBlock);
+        Camera.main.orthographicSize = 30;
         int highscore = PlayerPrefs.GetInt("score");
         if (highscore > _score)
             highScoreTxt.text = "Highscore: " + highscore.ToString();
