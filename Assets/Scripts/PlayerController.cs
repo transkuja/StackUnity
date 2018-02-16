@@ -13,8 +13,6 @@ public class PlayerController : MonoBehaviour {
 
     float errorAllowedForPerfects = 1.0f; // en %
 
-    float errorAllowed = 3.0f; // en %
-
     int combo = 0;
     int score = 0;
 
@@ -32,7 +30,7 @@ public class PlayerController : MonoBehaviour {
         }
     }
 
-    private void Start()
+    private void Awake()
     {
         combo = 0;
         Score = 0;
@@ -40,7 +38,7 @@ public class PlayerController : MonoBehaviour {
     }
 
     void Update () {
-		if (Input.GetMouseButtonDown(0))
+		if (Input.GetMouseButtonDown(0) && !gameManager.isInGameOver)
         {
             OnClickProcess();
         }
@@ -63,7 +61,7 @@ public class PlayerController : MonoBehaviour {
         }
         else
         {
-            gameManager.GameOver();
+            gameManager.GameOver(score);
         }
     }
 
@@ -78,9 +76,9 @@ public class PlayerController : MonoBehaviour {
             if (combo >= 8)
             {
                 if (gameManager.currentScale.x < gameManager.currentScale.z)
-                    gameManager.currentScale.x *= 1.2f;
+                    gameManager.currentScale.x = Mathf.Min(gameManager.defaultScale.x, 1.2f * gameManager.currentScale.x);
                 else
-                    gameManager.currentScale.z *= 1.2f;
+                    gameManager.currentScale.z = Mathf.Min(gameManager.defaultScale.z, 1.2f * gameManager.currentScale.z);
 
                 gameManager.currentBlock.transform.localScale = gameManager.currentScale;
             }
@@ -94,22 +92,32 @@ public class PlayerController : MonoBehaviour {
 
     bool CheckEdges()
     {
-        if (gameManager.lastSpawner == 1 && Mathf.Abs(gameManager.currentBlock.GetComponent<Collider>().bounds.extents.x - gameManager.tower.GetChild(gameManager.tower.childCount - 2).GetComponent<Collider>().bounds.extents.x) < errorAllowed)
+        Vector3 positionCurrentMinusY = new Vector3(gameManager.currentBlock.transform.position.x, 0, gameManager.currentBlock.transform.position.z);
+        Vector3 positionLastMinusY = new Vector3(gameManager.tower.GetChild(gameManager.tower.childCount - 2).position.x, 0, gameManager.tower.GetChild(gameManager.tower.childCount - 2).position.z);
+        float distance = Vector3.Distance(gameManager.currentBlock.transform.position, gameManager.tower.GetChild(gameManager.tower.childCount - 2).transform.position);
+
+        // Move along x
+        if (gameManager.lastSpawner == 1)
         {
-            Debug.Log("edge1");
+            if (distance > gameManager.currentBlock.GetComponent<Collider>().bounds.extents.x + gameManager.tower.GetChild(gameManager.tower.childCount - 2).GetComponent<Collider>().bounds.extents.x)
+                return false;
+            Debug.Log("here?");
             if (!CheckPerfectEdges())           
                 CutTheRope(true);
             return true;
         }
-        else if (gameManager.lastSpawner == 0 && Mathf.Abs(gameManager.currentBlock.GetComponent<Collider>().bounds.extents.z - gameManager.tower.GetChild(gameManager.tower.childCount - 2).GetComponent<Collider>().bounds.extents.z) < errorAllowed)
+        // Is moving along z
+        else
         {
             Debug.Log("edge2");
+            if (distance > gameManager.currentBlock.GetComponent<Collider>().bounds.extents.z + gameManager.tower.GetChild(gameManager.tower.childCount - 2).GetComponent<Collider>().bounds.extents.z)
+                return false;
+
             if (!CheckPerfectEdges())
                 CutTheRope(false);
             return true;
         }
-        // Lose
-        return false;
+
 
     }
     
@@ -119,22 +127,23 @@ public class PlayerController : MonoBehaviour {
         float diff;
         combo = 0;
         AudioManager.Instance.PlayOneShot(AudioManager.Instance.failFX, combo);
-
+        Transform last = gameManager.tower.GetChild(gameManager.tower.childCount - 2);
         if (_onX)
         {
-            diff = gameManager.currentBlock.transform.position.x - gameManager.tower.GetChild(gameManager.tower.childCount - 2).transform.position.x;
+            diff = gameManager.currentBlock.transform.position.x - last.position.x;
             if (diff > 0)
             {
                 Debug.Log(1);
                 gameManager.currentBlock.transform.localScale -= Vector3.right * diff;
-                gameManager.currentBlock.transform.position = new Vector3(diff / 2, gameManager.currentBlock.transform.position.y, gameManager.currentBlock.transform.position.z);
+                gameManager.currentBlock.transform.position = new Vector3(last.position.x + diff / 2, gameManager.currentBlock.transform.position.y, gameManager.currentBlock.transform.position.z);
 
                 gameManager.currentScale.x = gameManager.currentBlock.transform.localScale.x;
 
 
                 GameObject fallingPart = GameObject.CreatePrimitive(PrimitiveType.Cube);
                 fallingPart.transform.localScale = new Vector3(diff, gameManager.currentScale.y, gameManager.currentScale.z);
-                fallingPart.transform.position = new Vector3((diff + gameManager.currentScale.x)/2, gameManager.currentBlock.transform.position.y, gameManager.currentBlock.transform.position.z); ;
+                fallingPart.transform.position = new Vector3((gameManager.currentScale.x)/2 + diff, gameManager.currentBlock.transform.position.y, gameManager.currentBlock.transform.position.z); ;
+                fallingPart.GetComponent<Renderer>().material.color = gameManager.lastColor;
                 fallingPart.AddComponent<Rigidbody>();
             }
             else
@@ -142,32 +151,34 @@ public class PlayerController : MonoBehaviour {
                 Debug.Log(2);
                 diff = -diff;
                 gameManager.currentBlock.transform.localScale -= Vector3.right * diff;
-                gameManager.currentBlock.transform.position = new Vector3(-diff / 2, gameManager.currentBlock.transform.position.y, gameManager.currentBlock.transform.position.z);
+                gameManager.currentBlock.transform.position = new Vector3(last.position.x - (diff / 2), gameManager.currentBlock.transform.position.y, gameManager.currentBlock.transform.position.z);
 
                 gameManager.currentScale.x = gameManager.currentBlock.transform.localScale.x;
 
 
                 GameObject fallingPart = GameObject.CreatePrimitive(PrimitiveType.Cube);
                 fallingPart.transform.localScale = new Vector3(diff, gameManager.currentScale.y, gameManager.currentScale.z);
-                fallingPart.transform.position = new Vector3(-(diff + gameManager.currentScale.x) / 2, gameManager.currentBlock.transform.position.y, gameManager.currentBlock.transform.position.z); ;
+                fallingPart.transform.position = new Vector3(-(gameManager.currentScale.x) / 2 - diff, gameManager.currentBlock.transform.position.y, gameManager.currentBlock.transform.position.z); ;
+                fallingPart.GetComponent<Renderer>().material.color = gameManager.lastColor;
                 fallingPart.AddComponent<Rigidbody>();
             }
         }
         else
         {
-            diff = gameManager.currentBlock.transform.position.z - gameManager.tower.GetChild(gameManager.tower.childCount - 2).transform.position.z;
+            diff = gameManager.currentBlock.transform.position.z - last.position.z;
             if (diff > 0)
             {
                 Debug.Log(3);
                 gameManager.currentBlock.transform.localScale -= Vector3.forward * diff;
-                gameManager.currentBlock.transform.position = new Vector3(gameManager.currentBlock.transform.position.x, gameManager.currentBlock.transform.position.y, diff / 2);
+                gameManager.currentBlock.transform.position = new Vector3(gameManager.currentBlock.transform.position.x, gameManager.currentBlock.transform.position.y, last.position.z + (diff / 2));
 
                 gameManager.currentScale.z = gameManager.currentBlock.transform.localScale.z;
 
 
                 GameObject fallingPart = GameObject.CreatePrimitive(PrimitiveType.Cube);
                 fallingPart.transform.localScale = new Vector3(gameManager.currentScale.x, gameManager.currentScale.y, diff);
-                fallingPart.transform.position = new Vector3(gameManager.currentBlock.transform.position.x, gameManager.currentBlock.transform.position.y, (diff + gameManager.currentScale.z) / 2); ;
+                fallingPart.transform.position = new Vector3(gameManager.currentBlock.transform.position.x, gameManager.currentBlock.transform.position.y, diff + (gameManager.currentScale.z / 2)); ;
+                fallingPart.GetComponent<Renderer>().material.color = gameManager.lastColor;
                 fallingPart.AddComponent<Rigidbody>();
             }
             else
@@ -175,14 +186,15 @@ public class PlayerController : MonoBehaviour {
                 Debug.Log(4);
                 diff = -diff;
                 gameManager.currentBlock.transform.localScale -= Vector3.forward * diff;
-                gameManager.currentBlock.transform.position = new Vector3(gameManager.currentBlock.transform.position.x, gameManager.currentBlock.transform.position.y, -diff / 2);
+                gameManager.currentBlock.transform.position = new Vector3(gameManager.currentBlock.transform.position.x, gameManager.currentBlock.transform.position.y, last.position.z - (diff / 2));
 
                 gameManager.currentScale.x = gameManager.currentBlock.transform.localScale.x;
 
 
                 GameObject fallingPart = GameObject.CreatePrimitive(PrimitiveType.Cube);
                 fallingPart.transform.localScale = new Vector3(gameManager.currentScale.x, gameManager.currentScale.y, diff);
-                fallingPart.transform.position = new Vector3(gameManager.currentBlock.transform.position.x, gameManager.currentBlock.transform.position.y, -(diff + gameManager.currentScale.z) / 2); ;
+                fallingPart.transform.position = new Vector3(gameManager.currentBlock.transform.position.x, gameManager.currentBlock.transform.position.y, -(diff + (gameManager.currentScale.z/2)));
+                fallingPart.GetComponent<Renderer>().material.color = gameManager.lastColor;
                 fallingPart.AddComponent<Rigidbody>();
             }
         }
