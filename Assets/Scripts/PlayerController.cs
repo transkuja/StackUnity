@@ -70,7 +70,6 @@ public class PlayerController : MonoBehaviour {
         if (Mathf.Abs(gameManager.currentBlock.transform.position.x - gameManager.tower.GetChild(gameManager.tower.childCount - 2).position.x) < errorAllowedForPerfects
             && Mathf.Abs(gameManager.currentBlock.transform.position.z - gameManager.tower.GetChild(gameManager.tower.childCount - 2).position.z) < errorAllowedForPerfects)
         {
-            Debug.Log("Perfect!");
             // s'il est parfaitement dessus ==> combo ==> play ok sound ==> recalage
             combo++;
             if (combo >= 8)
@@ -101,7 +100,7 @@ public class PlayerController : MonoBehaviour {
         {
             if (distance > gameManager.currentBlock.GetComponent<Collider>().bounds.extents.x + gameManager.tower.GetChild(gameManager.tower.childCount - 2).GetComponent<Collider>().bounds.extents.x)
                 return false;
-            Debug.Log("here?");
+
             if (!CheckPerfectEdges())           
                 CutTheRope(true);
             return true;
@@ -109,7 +108,6 @@ public class PlayerController : MonoBehaviour {
         // Is moving along z
         else
         {
-            Debug.Log("edge2");
             if (distance > gameManager.currentBlock.GetComponent<Collider>().bounds.extents.z + gameManager.tower.GetChild(gameManager.tower.childCount - 2).GetComponent<Collider>().bounds.extents.z)
                 return false;
 
@@ -133,7 +131,6 @@ public class PlayerController : MonoBehaviour {
             diff = gameManager.currentBlock.transform.position.x - last.position.x;
             if (diff > 0)
             {
-                Debug.Log(1);
                 gameManager.currentBlock.transform.localScale -= Vector3.right * diff;
                 gameManager.currentBlock.transform.position = new Vector3(last.position.x + diff / 2, gameManager.currentBlock.transform.position.y, gameManager.currentBlock.transform.position.z);
 
@@ -148,7 +145,6 @@ public class PlayerController : MonoBehaviour {
             }
             else
             {
-                Debug.Log(2);
                 diff = -diff;
                 gameManager.currentBlock.transform.localScale -= Vector3.right * diff;
                 gameManager.currentBlock.transform.position = new Vector3(last.position.x - (diff / 2), gameManager.currentBlock.transform.position.y, gameManager.currentBlock.transform.position.z);
@@ -168,7 +164,6 @@ public class PlayerController : MonoBehaviour {
             diff = gameManager.currentBlock.transform.position.z - last.position.z;
             if (diff > 0)
             {
-                Debug.Log(3);
                 gameManager.currentBlock.transform.localScale -= Vector3.forward * diff;
                 gameManager.currentBlock.transform.position = new Vector3(gameManager.currentBlock.transform.position.x, gameManager.currentBlock.transform.position.y, last.position.z + (diff / 2));
 
@@ -183,7 +178,6 @@ public class PlayerController : MonoBehaviour {
             }
             else
             {
-                Debug.Log(4);
                 diff = -diff;
                 gameManager.currentBlock.transform.localScale -= Vector3.forward * diff;
                 gameManager.currentBlock.transform.position = new Vector3(gameManager.currentBlock.transform.position.x, gameManager.currentBlock.transform.position.y, last.position.z - (diff / 2));
