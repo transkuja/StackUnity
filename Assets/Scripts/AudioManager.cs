@@ -9,14 +9,8 @@ public class AudioManager : MonoBehaviour
     public AudioClip coinFX;
     public AudioClip failFX;
 
-
-    [SerializeField]
-    private float volumeMusic = 0.015f;
     [SerializeField]
     private float volumeFXs = 0.01f;
-
-
-    private float currentVolume;
 
     public static AudioManager Instance
     {
@@ -48,27 +42,13 @@ public class AudioManager : MonoBehaviour
         }
     }
 
-    void Start()
+    public void PlayOneShot(AudioClip clip, int currentCombo)
     {
-        currentVolume = volumeMusic;
-    }
-
-    public void PlayOneShot(AudioClip clip)
-    {
+        if (clip == failFX)
+            sourceFX.pitch = 0.4f;
+        else
+            sourceFX.pitch = Mathf.Min(1 + 0.1f * currentCombo, 1.8f);
         sourceFX.PlayOneShot(clip, volumeFXs);
-    }
-
-    public void PlayOneShot(AudioClip clip, float volumeMultiplier)
-    {
-        sourceFX.PlayOneShot(clip, volumeFXs * volumeMultiplier);
-    }
-
-    public void Play(AudioClip clip, float volumeMultiplier = 1.0f)
-    {
-        if (sourceFX.clip != clip)
-            sourceFX.clip = clip;
-        sourceFX.volume = volumeFXs * volumeMultiplier;
-        sourceFX.Play();
     }
 
 }

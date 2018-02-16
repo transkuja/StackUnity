@@ -9,6 +9,7 @@ public class GameManager : MonoBehaviour {
     public GameObject currentBlock;
     public Transform[] spawners;
     public int lastSpawner = 0;
+    public Transform tower;
 
     void InitGame()
     {
@@ -34,7 +35,14 @@ public class GameManager : MonoBehaviour {
         currentBlock.transform.localScale = currentScale;
         currentBlock.AddComponent<MoveBlock>().Init(lastSpawner == 0);
 
+        currentBlock.transform.SetParent(tower);
+
         lastSpawner++;
         lastSpawner %= spawners.Length;
+    }
+
+    public void GameOver()
+    {
+
     }
 }

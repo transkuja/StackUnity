@@ -5,13 +5,15 @@ using UnityEngine;
 public class MoveBlock : MonoBehaviour {
 
     float speed = 10.0f;
-    bool reverseMovement = false;
-    bool moveAlongX = false;
-    bool isInit = false;
-    bool firstTriggerIgnored = false;
+    public bool reverseMovement = false;
+
+    public bool moveAlongX = false;
+    public bool isInit = false;
+    public bool firstTriggerIgnored = false;
 
     public void Init(bool _moveAlongX)
     {
+        GetComponent<Collider>().isTrigger = true;
         moveAlongX = _moveAlongX;
         isInit = true;
     }
